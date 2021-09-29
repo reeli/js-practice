@@ -1,4 +1,4 @@
-// 实现 safe stringify
+// 实现 safe stringify / safe parse
 
 var b = {
   b1: "b1",
