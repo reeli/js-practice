@@ -1,4 +1,4 @@
-import {safeStringify} from "../001";
+import {safeStringify} from "../safeStringify";
 
 describe('safeStringify', () => {
   it('should do safe stringify if there are some circular reference', () => {
