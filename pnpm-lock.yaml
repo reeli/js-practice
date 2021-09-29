@@ -2,11 +2,15 @@ lockfileVersion: 5.3
 
 specifiers:
   '@babel/preset-env': ^7.15.6
+  '@babel/preset-typescript': ^7.15.0
+  '@types/jest': ^27.0.2
   jest: ^27.2.3
   typescript: ^4.4.3
 
 devDependencies:
   '@babel/preset-env': 7.15.6
+  '@babel/preset-typescript': 7.15.0
+  '@types/jest': 27.0.2
   jest: 27.2.3
   typescript: 4.4.3
 
@@ -706,6 +710,15 @@ packages:
       '@babel/helper-plugin-utils': 7.14.5
     dev: true
 
+  /@babel/plugin-syntax-typescript/7.14.5:
+    resolution: {integrity: sha512-u6OXzDaIXjEstBRRoBCQ/uKQKlbuaeE5in0RvWdA4pN6AhqxTIwUsnHPU1CFZA/amYObMsuWhYfRl3Ch90HD0Q==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/helper-plugin-utils': 7.14.5
+    dev: true
+
   /@babel/plugin-syntax-typescript/7.14.5_@babel+core@7.15.5:
     resolution: {integrity: sha512-u6OXzDaIXjEstBRRoBCQ/uKQKlbuaeE5in0RvWdA4pN6AhqxTIwUsnHPU1CFZA/amYObMsuWhYfRl3Ch90HD0Q==}
     engines: {node: '>=6.9.0'}
@@ -1023,6 +1036,19 @@ packages:
       '@babel/helper-plugin-utils': 7.14.5
     dev: true
 
+  /@babel/plugin-transform-typescript/7.15.4:
+    resolution: {integrity: sha512-sM1/FEjwYjXvMwu1PJStH11kJ154zd/lpY56NQJ5qH2D0mabMv1CAy/kdvS9RP4Xgfj9fBBA3JiSLdDHgXdzOA==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/helper-create-class-features-plugin': 7.15.4
+      '@babel/helper-plugin-utils': 7.14.5
+      '@babel/plugin-syntax-typescript': 7.14.5
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /@babel/plugin-transform-unicode-escapes/7.14.5:
     resolution: {integrity: sha512-crTo4jATEOjxj7bt9lbYXcBAM3LZaUrbP2uUdxb6WIorLmjNKSpHfIybgY4B8SRpbf8tEVIWH3Vtm7ayCrKocA==}
     engines: {node: '>=6.9.0'}
@@ -1135,6 +1161,19 @@ packages:
       '@babel/plugin-transform-dotall-regex': 7.14.5
       '@babel/types': 7.15.6
       esutils: 2.0.3
+    dev: true
+
+  /@babel/preset-typescript/7.15.0:
+    resolution: {integrity: sha512-lt0Y/8V3y06Wq/8H/u0WakrqciZ7Fz7mwPDHWUJAXlABL5hiUG42BNlRXiELNjeWjO5rWmnNKlx+yzJvxezHow==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/helper-plugin-utils': 7.14.5
+      '@babel/helper-validator-option': 7.14.5
+      '@babel/plugin-transform-typescript': 7.15.4
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@babel/runtime/7.15.4:
@@ -1455,6 +1494,13 @@ packages:
     resolution: {integrity: sha512-c3mAZEuK0lvBp8tmuL74XRKn1+y2dcwOUpH7x4WrF6gk1GIgiluDRgMYQtw2OFcBvAJWlt6ASU3tSqxp0Uu0Aw==}
     dependencies:
       '@types/istanbul-lib-report': 3.0.0
+    dev: true
+
+  /@types/jest/27.0.2:
+    resolution: {integrity: sha512-4dRxkS/AFX0c5XW6IPMNOydLn2tEhNhJV7DnYK+0bjoJZ+QTmfucBlihX7aoEsh/ocYtkLC73UbnBXBXIxsULA==}
+    dependencies:
+      jest-diff: 27.2.3
+      pretty-format: 27.2.3
     dev: true
 
   /@types/node/16.10.1:
