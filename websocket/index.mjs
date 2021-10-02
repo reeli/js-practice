@@ -12,7 +12,11 @@ wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message, isBinary) {
     wss.clients.forEach(client=>{
       if (client.readyState === WebSocket.OPEN) {
-        client.send(message,  { binary: isBinary })
+        if(`${message}`==="heartbeat"){
+          client.send("heartbeat")
+        }else{
+          client.send(message,  { binary: isBinary })
+        }
       }
     })
     console.log('received: %s', message);
