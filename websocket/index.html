@@ -8,66 +8,52 @@
   <title>Websocket</title>
 </head>
 <body>
-<button onclick="connectWs()">Connect</button>
-<input type="text" onblur="sendMsg(this.value)" placeholder="Send message..."/>
+<button onclick="ws.init()">Click me to Start Connect</button>
+<input type="text" onblur="ws.sendMsg(this.value)" placeholder="Send message..."/>
 <div id="msgList"></div>
 <script>
-  let client = null;
-  let pingTimerId = null;
-  let pingTimeout = null;
-  let TIMEOUT_NUMBER = 3000;
-
-  const msgList = document.getElementById("msgList");
-
-  function sendMsg(value) {
-    client.send(JSON.stringify({hello: value}));
-  }
-
-  function setTimeBomb() {
-    clearTimeout(pingTimeout)
-
-    pingTimeout = setTimeout(() => {
-      client.close();
-    }, TIMEOUT_NUMBER + 1000);
-  }
-
-  function heartBeat() {
-    if (pingTimerId) {
-      clearTimeout(pingTimerId);
+  class WsClient {
+    constructor({url}) {
+      this.client = new WebSocket(url);
     }
 
-    pingTimerId = setTimeout(() => {
-      client.send("heartbeat")
-    }, TIMEOUT_NUMBER);
+    init() {
+      this.client.addEventListener("open", this.onOpen);
+      this.client.addEventListener("close", this.onClose);
 
-    setTimeBomb();
-  }
+      this.client.addEventListener("message", this.onMessage)
+    }
 
-  function connectWs() {
-    if (!client) {
-      client = new WebSocket('ws://localhost:8080');
+    destroy() {
+      this.client.removeEventListener("open", this.onOpen)
+      this.client.removeEventListener("close", this.onClose)
+    }
 
-      // 连接成功之后要做什么
-      client.addEventListener('open', () => {
-        client.send(JSON.stringify({rui: "12312"}));
-        heartBeat()
-      });
+    onMessage(event) {
+      const msgList = document.getElementById("msgList")
+      const div = document.createElement("div");
+      div.innerHTML = `${event.data}`;
+      msgList.append(div)
 
-      // 当从服务器收到信息时要做什么
-      client.addEventListener('message', (event) => {
-        if (event.data === "heartbeat") {
-          heartBeat();
-          clearTimeout(pingTimeout)
-          return;
-        }
-        const div = document.createElement("div");
-        div.innerHTML = `${event.data}`;
-        msgList.append(div)
+      console.log('Message from server ', event.data);
+    }
 
-        console.log('Message from server ', event.data);
-      });
+    onOpen() {
+      console.log("on open")
+      this.client.send("hello server");
+    }
+
+    onClose() {
+      console.log("on close");
+    }
+
+    sendMsg(value){
+      this.client.send(JSON.stringify({hello: value}));
     }
   }
+
+  const ws = new WsClient({url: "ws://localhost:8080"})
+
 
 </script>
 </body>
