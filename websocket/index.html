@@ -13,23 +13,38 @@
 <div id="msgList"></div>
 <script>
   class WsClient {
-    constructor({url}) {
-      this.client = new WebSocket(url);
+    constructor({url, timePeriod, pingMsg, maxRetry}) {
+      this.url =url;
+      this.timePeriod = timePeriod || 3000;
+      this.pingMsg = pingMsg || "heartbeat";
+      this.pingTimerId = null;
+      this.pingTimeoutId  = null;
+      this.maxRetry = maxRetry || 3;
     }
 
     init() {
-      this.client.addEventListener("open", this.onOpen);
-      this.client.addEventListener("close", this.onClose);
-
-      this.client.addEventListener("message", this.onMessage)
+      this.client = new WebSocket(this.url);
+      // open 是连接的时候的执行的事件回调，如果 this.client 是在 constructor 里面创建，这里再监听 open 事件就再也收不到任何通知了
+      this.client.addEventListener("open", this.onOpen.bind(this));
+      this.client.addEventListener("message", this.onMessage.bind(this));
+      this.client.addEventListener("close", this.onClose.bind(this));
     }
 
     destroy() {
       this.client.removeEventListener("open", this.onOpen)
-      this.client.removeEventListener("close", this.onClose)
+      this.client.removeEventListener("close", this.onClose);
+      this.clearHeartbeat();
+      this.clearTimeBomb();
     }
 
     onMessage(event) {
+      // 收到后端的响应之后，重新开始新的心跳，并清除关闭连接的「定时炸弹」
+      if(event.data === this.pingMsg){
+        this.clearTimeBomb();
+        this.heartbeat();
+        return;
+      }
+
       const msgList = document.getElementById("msgList")
       const div = document.createElement("div");
       div.innerHTML = `${event.data}`;
@@ -39,16 +54,60 @@
     }
 
     onOpen() {
-      console.log("on open")
-      this.client.send("hello server");
+      this.client.send(JSON.stringify("hello server"));
+
+      // 建立连接之后开始心跳，并设置定制器当一段时间后端无心跳响应，关闭连接
+      this.heartbeat();
+      this.setTimeBomb();
     }
 
     onClose() {
-      console.log("on close");
+      if(this.maxRetry>0){
+        // 尝试重新建立连接
+        this.destroy();
+        this.init();
+        this.maxRetry -=1;
+      }else{
+        console.log("closed")
+        this.client.close();
+      }
     }
 
-    sendMsg(value){
+    sendMsg(value) {
       this.client.send(JSON.stringify({hello: value}));
+    }
+
+    ping() {
+      this.client.send(this.pingMsg);
+      // console.log("heartbeat")
+    }
+
+    heartbeat() {
+      this.clearHeartbeat();
+
+      this.pingTimerId = setTimeout(() => {
+        this.ping();
+      }, this.timePeriod);
+    }
+
+    clearHeartbeat(){
+      if(this.pingTimerId){
+        clearTimeout(this.pingTimerId);
+      }
+    }
+
+    setTimeBomb(){
+      this.clearTimeBomb();
+
+      this.pingTimeoutId = setTimeout(()=>{
+        this.client.close();
+      }, this.timePeriod+1000)
+    }
+
+    clearTimeBomb(){
+      if(this.pingTimeoutId){
+        clearTimeout(this.pingTimeoutId);
+      }
     }
   }
 
