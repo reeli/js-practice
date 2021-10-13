@@ -22,33 +22,20 @@ interface InputItem {
   name: string;
 }
 
-interface Node {
+interface TreeNode {
   id: number;
   name: string;
-  children: Node[] | null
+  children: TreeNode[] | null
 }
 
-const toTree = (data: InputItem[]): Node[] | null => {
-  const filterChildrenByParentId = (parentId: number | null): Node[] | null => {
-    const children = data.filter(v => v.parent === parentId);
-
-    if (children.length > 0) {
-      return children.map(child => {
-        const ch = filterChildrenByParentId(child.id);
-        const v = ch ? {children: ch} : undefined;
-
-        return ({
-          id: child.id,
-          name: child.name,
-          ...v
-        });
-      }) as Node[]
-    }
-
-    return null;
-  }
-
-  return filterChildrenByParentId(null);
+const toTree = (data: InputItem[], parentId: number | null = null): TreeNode[] => {
+  return data
+    .filter(v => v.parent === parentId)
+    .map((v): TreeNode => ({
+      name: v.name,
+      id: v.id,
+      children: toTree(data, v.id),
+    }));
 }
 
-console.log(JSON.stringify(toTree(data), null, 2), 'toTree(data)')
+console.log(JSON.stringify(toTree(data,), null, 2), 'toTree(data)')
