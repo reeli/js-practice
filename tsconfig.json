@@ -4,6 +4,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "strict": true,
+//    "strictFunctionTypes": false,
     "alwaysStrict": true,
     "pretty": true,
     "noUnusedLocals": true,
