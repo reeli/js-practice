@@ -1,5 +1,6 @@
 // 实现 flat
 
+// 参考：https://segmentfault.com/a/1190000021366004
 // reduce 版本/循环版本/递归版本
 
 export const flat = (array: unknown[], depth = 1): any[] => {
