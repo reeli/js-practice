@@ -2,8 +2,7 @@ type AnyObject = Record<any, any>;
 type BuilderObj<T> = { [k in keyof T]: (value: T[k]) => BuilderObj<T> };
 
 function builder<T extends AnyObject>() {
-
-  return new Proxy({} as BuilderObj<T & { values: T }>, {
+  const proxy = new Proxy({} as BuilderObj<T & { values:T }>, {
     get: function (obj, prop: keyof T) {
       if (prop === "values") {
         return obj;
@@ -12,10 +11,12 @@ function builder<T extends AnyObject>() {
       return ((value) => {
         obj[prop] = value;
 
-        return this;
+        return proxy;
       }) as BuilderObj<T>[keyof T];
     },
-  });
+  }) as BuilderObj<T & { values: T }>;
+
+  return proxy;
 }
 
 interface Foo {
@@ -27,10 +28,6 @@ interface Foo {
 }
 
 const b = builder<Foo>();
+const result = b.name("hello").age(123).address("address").values
 
-b.name("rui");
-b.address("hello");
-b.count(12);
-b.fakeName("fake name");
-
-console.log(b.values);
+console.log(result);
