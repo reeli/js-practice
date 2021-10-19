@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Two Way Binding</title>
+</head>
+<body>
+
+<input placeholder="type..." id="input"/>
+<span id="txt"></span>
+
+<script>
+  const obj = {};
+
+  Object.defineProperty(obj, "text", {
+    get: ()=>{
+
+    },
+    set:(newValue)=>{
+      console.log("set: ", newValue);
+      document.getElementById("input").value = newValue;
+      document.getElementById("txt").innerHTML = newValue;
+    }
+  })
+
+  const input = document.getElementById("input");
+
+  input.addEventListener("input", (evt)=>{
+    obj.text = evt.target.value
+  })
+
+  setTimeout(()=>{
+    obj.text = "hello"
+  }, 5000)
+</script>
+</body>
+</html>
