@@ -1,98 +1,80 @@
-type Resolve = (value: any) => any;
-type Reject = (reason: any) => any;
+// 1. 定义 Promise 的状态(三种)，定义用来存储成功的 callback 函数和 失败的 callback 函数
+// 2. 定义 Promise 包含的实例方法：resolve, reject, then
 
-type PromiseCallback = (resolve: Resolve, reject: Reject) => void;
+type Resolve<T> = (value: T) => any;
+type Reject = (reason: string) => any;
 
-enum PromiseStatus {
-  pending = "pending",
-  fulfilled = "fulfilled",
-  rejected = "rejected"
+enum Status {
+  Pending = "Pending",
+  Fulfilled = "Fulfilled",
+  Rejected = "Rejected"
 }
 
-type Reason = any;
-type Value = any;
-type FullFilledCallback = (value: Value, ...args: any[]) => any;
-type RejectedCallback = (reason: Reason, ...args: any[]) => any;
+type OnFulFilled<T> = (value: T|undefined) => any;
+type OnRejected = (reason: string) => any;
 
-class MyPromise {
-  status: PromiseStatus = PromiseStatus.pending;
-  reason: Reason;
-  value: Value;
-  fullFilledCallbacks: FullFilledCallback[] = []
-  rejectedCallbacks: RejectedCallback[] = []
+export class MyPromise<TValue> {
+  value: TValue|undefined = undefined;
+  status: Status
+  fulfilledCallbacks: OnFulFilled<TValue>[] = [];
+  rejectedCallbacks: OnRejected[] = [];
 
-  constructor(cb?: PromiseCallback) {
-    if (cb) {
-      this.status = PromiseStatus.pending;
-      cb(this.resolve, this.reject)
-    }
+  constructor(fn: (resolve: Resolve<TValue>, reject: Reject) => any) {
+    this.status = Status.Pending;
+    fn(this.resolve, this.reject);
   }
 
-  resolve = (value: any) => {
-    if (this.status !== PromiseStatus.fulfilled) {
-      this.status = PromiseStatus.fulfilled;
-      this.fullFilledCallbacks.reduce((a, b) => {
-        try {
-          return b(a(value))
-        } catch (err) {
-          return this.reject(err)
-        }
-      })
-    }
+  resolve = (value: TValue) => {
+    setTimeout(()=>{
+      if (this.status === Status.Pending) {
+        this.status = Status.Fulfilled;
+        this.value = value;
+
+        this.fulfilledCallbacks.forEach(cb => {
+          this.value = cb(this.value);
+        });
+      }
+    }, 0)
   }
 
-  reject = (reason: any) => {
-    if (this.status !== PromiseStatus.rejected) {
-      this.status = PromiseStatus.rejected;
+  reject = (reason: string) => {
+    setTimeout(()=>{
+      if (this.status === Status.Pending) {
+        this.status = Status.Rejected;
 
-      this.rejectedCallbacks.forEach((a) => {
-        a(reason)
-      })
-    }
+        this.rejectedCallbacks.forEach((cb) => {
+          cb(reason)
+        });
+      }
+    },0)
   }
 
-  then = (onFulfilled?: (value: Value, ...args: any[]) => any, onRejected?: (arg: Reason, ...args: any[]) => any) => {
-    if (typeof onFulfilled === "function") {
-      this.fullFilledCallbacks = [
-        ...this.fullFilledCallbacks,
-        onFulfilled
-      ]
-    }
+  then = (onFulfilled?: OnFulFilled<TValue>, onRejected?: OnRejected) => {
+    const onFulfilledCallback = typeof onFulfilled === "function" ? onFulfilled : () => {
+    };
+    const onRejectedCallback = typeof onRejected === "function" ? onRejected : () => {
+    };
 
-    if (typeof onRejected === "function") {
-      this.rejectedCallbacks = [
-        ...this.rejectedCallbacks,
-        onRejected
-      ]
-    }
+    this.fulfilledCallbacks.push(onFulfilledCallback);
+    this.rejectedCallbacks.push(onRejectedCallback);
 
     return this;
   }
 
-  catch = (_: any) => {
-    return this;
+  catch = ()=>{
+
   }
 }
 
-new MyPromise((resolve) => {
-  setTimeout(() => {
-    resolve(1)
-  }, 0)
-}).then(value => {
-  console.log(value)
-  throw new Error("test")
-}).then(value => {
-  console.log(value, "value")
-}, (err) => {
-  console.log("rejected1", err)
+new MyPromise<string>((resolve, reject) => {
+  // setTimeout(() => {
+  //   resolve("hello")
+  // }, 400)
+  resolve("hello");
+  reject("error")
+}).then((data) => {
+  console.log(data, "resolved");
+  return data + "123";
+}, (data)=>{
+  console.log(data, "rejected")
 })
-
-// new Promise((resolve) => {
-//   setTimeout(() => {
-//     resolve(1)
-//   }, 0)
-// }).then(value => {
-//   console.log(value)
-// }).then(value => {
-//   console.log(value)
-// })
