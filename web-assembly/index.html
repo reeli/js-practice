@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Web Assembly</title>
+  <script type="module">
+    function loadWebAssembly(url) {
+      return WebAssembly.instantiateStreaming(fetch(url), {}).then(obj => {
+        console.log("obj.instance.exports:",obj.instance.exports)
+        return obj.instance.exports;
+      }).catch()
+    }
+
+    const {main} = await loadWebAssembly('./program.wasm')
+    console.log(main())
+  </script>
+</head>
+<body>
+
+</body>
+</html>
