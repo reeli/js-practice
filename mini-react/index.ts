@@ -33,13 +33,13 @@ const isEqual = (a?: any, b?: any): boolean => {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-const diffChildren = (rootElement: HTMLElement & { vDOM?: VNode; }, prev: VNode, current: VNode) => {
+const diffChildren = (prev: VNode, current: VNode) => {
   prev.children?.forEach((v, idx) => {
     const prevChild = (v as VNode);
     const currentChild = current.children ? (current.children[idx] as VNode) : null;
 
     if (currentChild && isObject(prevChild) && isObject(currentChild)) {
-      diff(rootElement, prevChild, currentChild);
+      diff(prev?.html!, prevChild, currentChild);
       return;
     }
 
@@ -50,13 +50,13 @@ const diffChildren = (rootElement: HTMLElement & { vDOM?: VNode; }, prev: VNode,
   })
 }
 
-const typeDiff = (rootElement: HTMLElement & { vDOM?: VNode; }, prev: VNode, current: VNode) => {
+const typeDiff = (parentEl:HTMLElement,prev: VNode, current: VNode) => {
+  diff(parentEl, null, current, prev.html);
   prev.html && prev.html.remove();
-  diff(rootElement, null, current);
   return;
 }
 
-const propsDiff = (_: HTMLElement & { vDOM?: VNode }, prev: VNode, current: VNode) => {
+const propsDiff = (prev: VNode, current: VNode) => {
   for (const k in prev.props) {
     const currentKeys = Object.keys(current.props);
     if (currentKeys.includes(k)) {
@@ -72,7 +72,7 @@ const propsDiff = (_: HTMLElement & { vDOM?: VNode }, prev: VNode, current: VNod
   });
 }
 
-const diff = (rootElement: HTMLElement & { vDOM?: VNode; }, prev: VNode | null, current: VNode) => {
+const diff = (parentEl: HTMLElement & { vDOM?: VNode; }, prev: VNode | null, current: VNode, beforeEl?:HTMLElement) => {
   if (!prev) {
     const element = document.createElement(current.type);
     current.html = element;
@@ -91,21 +91,25 @@ const diff = (rootElement: HTMLElement & { vDOM?: VNode; }, prev: VNode | null, 
       element.appendChild(textNode);
     })
 
-    rootElement.appendChild(element)
+    if(beforeEl){
+      parentEl.insertBefore(element, beforeEl)
+    }else{
+      parentEl.appendChild(element);
+    }
     return;
   }
 
   if (prev.type !== current.type) {
-    typeDiff(rootElement, prev, current);
+    typeDiff(parentEl,prev, current);
     return;
   }
 
   if (!isEqual(prev.props, current.props)) {
-    propsDiff(rootElement, prev, current)
+    propsDiff(prev, current)
   }
 
   if (!isEqual(prev.children, current.children)) {
-    diffChildren(rootElement, prev, current);
+    diffChildren(prev, current);
   }
 }
 

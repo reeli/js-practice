@@ -82,9 +82,9 @@ describe('createElement', () => {
     const currentContent2 = root.querySelector("#content2");
     const currentContent3 = root.querySelector("#content3");
 
-    expect(root.innerHTML).toEqual(`<div id="div-3"><div id="content3">3</div><span id="content2">2</span></div>`)
-
     expect(prevContent1).not.toEqual(currentContent3);
     expect(prevContent2).toEqual(currentContent2);
+
+    expect(root.innerHTML).toEqual(`<div id="div-3"><div id="content3">3</div><span id="content2">2</span></div>`)
   });
 });
