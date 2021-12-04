@@ -53,7 +53,7 @@ describe('createElement', () => {
     expect(div.innerHTML).toEqual(`<div id="my-div-2" name="good"><span id="content">my content</span></div>`)
   });
 
-  it('should diff child', () => {
+  it('should diff single child', () => {
     const div = document.createElement("div")
     const child1 = createElement("span", {id: "content"}, ["my content"]);
 
@@ -66,7 +66,7 @@ describe('createElement', () => {
     expect(div.innerHTML).toEqual(`<div id="my-div-2"><span id="content2">my content2</span></div>`)
   });
 
-  it('should diff child', () => {
+  it('should diff with multiple child', () => {
     const root = document.createElement("div")
     const child1 = createElement("span", {id: "content1"}, ["1"]);
     const child2 = createElement("span", {id: "content2"}, ["2"]);

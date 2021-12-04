@@ -6,9 +6,10 @@ interface VNode {
   type: string;
   props: AnyObject;
   children?: ChildNode[] | null;
+  html?: HTMLElement
 }
 
-const isObject = (data: any)=> typeof data === "object" && data !== null
+const isObject = (data: any) => typeof data === "object" && data !== null
 
 export const createElement = (type: string, props: AnyObject, children?: ChildNode[]): VNode => {
   function mapChildren(children: ChildNode[]) {
@@ -28,80 +29,87 @@ export const createElement = (type: string, props: AnyObject, children?: ChildNo
   }
 }
 
-const isEqual = (a: AnyObject, b: AnyObject): boolean => {
+const isEqual = (a?: any, b?: any): boolean => {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-const diff = (rootElement: HTMLElement & {vDOM?: VNode; html?: HTMLElement}, prev: VNode, current: VNode) => {
+const diffChildren = (rootElement: HTMLElement & { vDOM?: VNode; }, prev: VNode, current: VNode) => {
+  prev.children?.forEach((v, idx) => {
+    const prevChild = (v as VNode);
+    const currentChild = current.children ? (current.children[idx] as VNode) : null;
+
+    if (currentChild && isObject(prevChild) && isObject(currentChild)) {
+      diff(rootElement, prevChild, currentChild);
+      return;
+    }
+
+    if (currentChild && !isObject(currentChild)) {
+      const content = document.createTextNode(currentChild as any);
+      prev.html?.replaceChildren(content);
+    }
+  })
+}
+
+const typeDiff = (rootElement: HTMLElement & { vDOM?: VNode; }, prev: VNode, current: VNode) => {
+  prev.html && prev.html.remove();
+  diff(rootElement, null, current);
+  return;
+}
+
+const propsDiff = (_: HTMLElement & { vDOM?: VNode }, prev: VNode, current: VNode) => {
+  for (const k in prev.props) {
+    const currentKeys = Object.keys(current.props);
+    if (currentKeys.includes(k)) {
+      prev.html && prev.props[k] !== current.props[k] && prev.html.setAttribute(k, current.props[k]);
+    } else {
+      prev.html && prev.html.removeAttribute(k);
+    }
+  }
+
+  const newAddedKeys = Object.keys(current.props).filter((v) => !Object.keys(prev.props).includes(v));
+  newAddedKeys.forEach(k => {
+    prev.html && prev.html.setAttribute(k, current.props[k]);
+  });
+}
+
+const diff = (rootElement: HTMLElement & { vDOM?: VNode; }, prev: VNode | null, current: VNode) => {
+  if (!prev) {
+    const element = document.createElement(current.type);
+    current.html = element;
+
+    for (const k in current.props) {
+      element.setAttribute(k, current.props[k]);
+    }
+
+    current.children?.forEach((v) => {
+      if (isObject(v)) {
+        diff(element, null, v as VNode)
+        return;
+      }
+
+      const textNode = document.createTextNode(v as string);
+      element.appendChild(textNode);
+    })
+
+    rootElement.appendChild(element)
+    return;
+  }
+
   if (prev.type !== current.type) {
-    rootElement.html && rootElement.removeChild(rootElement.html);
-    renderContent(rootElement, current);
+    typeDiff(rootElement, prev, current);
     return;
   }
 
   if (!isEqual(prev.props, current.props)) {
-    for (const k1 in prev.props){
-      const currentKeys = Object.keys(current.props);
-      if(currentKeys.includes(k1)){
-        if(prev.props[k1] !== current.props[k1]){
-          const child = rootElement.html;
-          child && child.setAttribute(k1, current.props[k1]);
-        }
-      }else{
-        const child = rootElement.html;
-        child && child.removeAttribute(k1);
-      }
-    }
-
-    const newAddedKeys = Object.keys(current.props).filter((v)=> !Object.keys(prev.props).includes(v));
-    const child = rootElement.html;
-
-    newAddedKeys.forEach(k=>{
-      child && child.setAttribute(k, current.props[k]);
-    });
+    propsDiff(rootElement, prev, current)
   }
 
-  prev.children?.forEach((v, idx) => {
-    if(isObject(v) && current.children && isObject(current.children[idx])){
-      diff((rootElement?.html as any), v as VNode, current.children[idx] as VNode)
-      return;
-    }
-
-    if(current.children && !isObject(current.children[idx])){
-      const content = document.createTextNode(current.children[idx] as any);
-      (rootElement?.html as any)?.replaceChildren(content);
-    }
-  })
+  if (!isEqual(prev.children, current.children)) {
+    diffChildren(rootElement, prev, current);
+  }
 }
 
-
-const renderContent = (rootElement:HTMLElement & {vDOM?: VNode; html?: HTMLElement}, content:VNode)=>{
-  const element = document.createElement(content.type);
-
-  for (const k in content.props) {
-    element.setAttribute(k, content.props[k]);
-  }
-
-  content.children?.forEach((v) => {
-    if (typeof v === "string") {
-      const textNode = document.createTextNode(v);
-      element.appendChild(textNode);
-    } else {
-      renderContent(element, v as VNode);
-    }
-  })
-
-  rootElement.vDOM = content;
-  rootElement.html = element;
-
-  rootElement.appendChild(element)
-}
-
-export const render = (rootElement: HTMLElement & {vDOM?: VNode; html?: HTMLElement}, content: VNode) => {
-  if (rootElement.vDOM) {
-    diff(rootElement, rootElement.vDOM, content);
-    return;
-  }
-
-  renderContent(rootElement, content);
+export const render = (parentEl: HTMLElement & { vDOM?: VNode; }, vNode: VNode) => {
+  diff(parentEl, parentEl.vDOM || null, vNode)
+  parentEl.vDOM = vNode;
 }
