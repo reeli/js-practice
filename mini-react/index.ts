@@ -91,11 +91,7 @@ const diff = (parentEl: HTMLElement & { vDOM?: VNode; }, prev: VNode | null, cur
       element.appendChild(textNode);
     })
 
-    if(beforeEl){
-      parentEl.insertBefore(element, beforeEl)
-    }else{
-      parentEl.appendChild(element);
-    }
+    parentEl.insertBefore(element, beforeEl|| null)
     return;
   }
 
