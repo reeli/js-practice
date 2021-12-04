@@ -1,5 +1,5 @@
 {
-  "testEnvironment": "node",
+  "testEnvironment": "jsdom",
   "coverageDirectory": "coverage",
   "testRegex": ".*/__tests__/.+\\.(generator|test|spec)\\.(ts|tsx|js|jsx)$",
   "collectCoverage": true,
