@@ -35,10 +35,12 @@ export const render = (rootElement: HTMLElement, content: VNode) => {
   }
 
 
-  content.children?.forEach(v=>{
+  content.children?.forEach((v)=>{
     if(typeof v==="string"){
       const textNode = document.createTextNode(v);
       element.appendChild(textNode);
+    }else{
+      render(element, v as VNode);
     }
   })
 
