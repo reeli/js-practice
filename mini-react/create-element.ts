@@ -1,7 +1,7 @@
 import {VNode, VChildNode} from "./types";
 import {isObject, flat} from "./utils";
 
-export const createElement = (type: string | Function, props: AnyObject, children?: VChildNode[]): VNode => {
+export const createElement = (type: string | Function, props: AnyObject, children?: VChildNode[]|null): VNode => {
   if (typeof type === "function") {
     return {
       type,
@@ -21,7 +21,7 @@ export const createElement = (type: string | Function, props: AnyObject, childre
       if (isObject(child)) {
         return child;
       }
-
+// <Foo>{false}</Foo> => <div>false</div>
       return String(child);
     });
 

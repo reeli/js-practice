@@ -1,80 +1,8 @@
 // @ts-nocheck
-import {createElement, render, flat} from "../index";
+import {createElement} from "../create-element";
+import {render} from "../render"
 
-describe('createElement', () => {
-  it('should create dom element', () => {
-    expect(createElement("div", {id: "my-div", content: 123})).toEqual({
-      type: "div",
-      props: {
-        id: "my-div",
-        content: 123
-      },
-      children: null
-    })
-  });
-
-  it('should create component', () => {
-    const Hello = (props) => (
-      <div id="container">
-        <span>{props.greet}</span>
-        {props.children}
-      </div>
-    );
-    const child = createElement("div", {id: "name"}, ["rui"]);
-
-    expect(createElement(Hello, {name: "rui"}, [child])).toEqual({
-      type: Hello,
-      props: {
-        name: "rui",
-        children: [
-          {
-            type: "div",
-            props: {id: "name"},
-            children: ["rui"]
-          }
-        ]
-      },
-    })
-  });
-
-  it("should create component without props and children", () => {
-    const Foo = () => createElement("div", {id: "foo"}, [1]);
-    expect(createElement(Foo, {}, null)).toEqual({
-      type: Foo,
-      props: {
-        children: null
-      },
-    });
-  });
-
-  it("should create component with multiple child", () => {
-    const Foo = (props) => {
-      return createElement("div", {id: "foo"}, [
-        createElement("span", null, [props.greet]),
-        props.children
-      ])
-    };
-
-    expect(Foo({greet: "hello", children: "content"})).toEqual({
-      type: "div",
-      props: {
-        id: "foo",
-      },
-      children: [
-        {
-          type: "span",
-          props: null,
-          children: ["hello"]
-        },
-        "content"
-      ]
-    });
-    expect(createElement(Foo, {greet: "hello"}, ["content1"])).toEqual({
-      type: Foo,
-      props: {greet: "hello", children: ["content1"]},
-    })
-  })
-
+describe('render', () => {
   it('should render VNode to html', () => {
     const div = document.createElement("div")
     render(div, createElement("div", {id: "my-div"}, [123, 456, "hello-world"]));
