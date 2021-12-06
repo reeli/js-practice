@@ -1,10 +1,10 @@
 type AnyObject = Record<string, any>;
 
-type ChildFn = (props:AnyObject)=> ChildNode;
-type ChildNode = VNode | ChildFn| boolean | string | number | undefined | null;
+type ChildFn = (props: AnyObject) => ChildNode;
+type ChildNode = VNode | ChildFn | boolean | string | number | undefined | null;
 
 interface VNode {
-  type: string;
+  type: string | Function;
   props: AnyObject;
   children?: ChildNode[] | null;
   html?: HTMLElement
@@ -12,15 +12,42 @@ interface VNode {
 
 const isObject = (data: any) => typeof data === "object" && data !== null
 
-export const createElement = (type: string, props: AnyObject, children?: ChildNode[]): VNode => {
-  function mapChildren(children: ChildNode[]) {
-    return children.map((child: ChildNode) => {
+export const flat = (data: any[]): any[] => {
+  return data.reduce((res, item) => {
+    if (Array.isArray(item)) {
+      return [
+        ...res,
+        ...flat(item)
+      ]
+    }
+
+    return [...res, item];
+  }, [])
+}
+
+export const createElement = (type: string | Function, props: AnyObject, children?: ChildNode[]): VNode => {
+  if (typeof type === "function") {
+    return {
+      type,
+      props: {
+        ...props,
+        children: children ? mapChildren(children) as ChildNode[] : null
+      }
+    }
+  }
+
+  function mapChildren(children: ChildNode[]): any[] {
+    const res = children.map((child: ChildNode) => {
+      if (Array.isArray(child)) {
+        return mapChildren(child);
+      }
       if (isObject(child)) {
         return child;
       }
 
       return String(child);
-    })
+    });
+    return flat(res);
   }
 
   return {
@@ -51,7 +78,7 @@ const diffChildren = (prev: VNode, current: VNode) => {
   })
 }
 
-const typeDiff = (parentEl:HTMLElement,prev: VNode, current: VNode) => {
+const typeDiff = (parentEl: HTMLElement, prev: VNode, current: VNode) => {
   diff(parentEl, null, current, prev.html);
   prev.html && prev.html.remove();
   return;
@@ -73,31 +100,40 @@ const propsDiff = (prev: VNode, current: VNode) => {
   });
 }
 
-const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode, beforeEl?:HTMLElement) => {
-  if (!prev) {
-    const element = document.createElement(current.type);
-    current.html = element;
+const createEl = (parentEl: HTMLElement, current: VNode, beforeEl?: HTMLElement) => {
+  const element = document.createElement(current.type as string);
+  current.html = element;
 
-    for (const k in current.props) {
-      element.setAttribute(k, current.props[k]);
+  for (const k in current.props) {
+    element.setAttribute(k, current.props[k]);
+  }
+
+  current.children?.forEach((v) => {
+    if (isObject(v)) {
+      diff(element, null, v as VNode)
+      return;
     }
 
-    current.children?.forEach((v) => {
-      if (isObject(v)) {
-        diff(element, null, v as VNode)
-        return;
-      }
+    const textNode = document.createTextNode(v as string);
+    element.appendChild(textNode);
+  })
 
-      const textNode = document.createTextNode(v as string);
-      element.appendChild(textNode);
-    })
+  parentEl.insertBefore(element, beforeEl || null)
+}
 
-    parentEl.insertBefore(element, beforeEl|| null)
+const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode, beforeEl?: HTMLElement) => {
+  if (!prev) {
+    if (typeof current.type === "function") {
+      createEl(parentEl, current.type(current.props), beforeEl)
+      return;
+    }
+
+    createEl(parentEl, current, beforeEl);
     return;
   }
 
   if (prev.type !== current.type) {
-    typeDiff(parentEl,prev, current);
+    typeDiff(parentEl, prev, current);
     return;
   }
 
