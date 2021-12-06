@@ -2,7 +2,7 @@ import { createElement } from "../create-element";
 
 describe("createElement", () => {
   it("should create dom element", () => {
-    expect(createElement("div", { id: "my-div", content: 123 })).toEqual({
+    expect(createElement("div", { id: "my-div", content: 123 }, null)).toEqual({
       type: "div",
       props: {
         id: "my-div",

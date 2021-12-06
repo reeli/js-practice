@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createElement } from "../create-element";
 import { render } from "../render";
 
@@ -81,7 +80,7 @@ describe("render", () => {
 
   it("should diff components", () => {
     const root = document.createElement("div");
-    const Foo = (props) => {
+    const Foo = (props: any) => {
       return createElement("div", { id: "foo" }, [createElement("span", null, [props.greet]), props.children]);
     };
 

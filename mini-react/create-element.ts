@@ -1,7 +1,7 @@
-import { VNode, VChildNode } from "./types";
 import { flat } from "./utils";
+import { VChildNode } from "./types";
 
-export const createElement = (type: string | Function, props: AnyObject, children?: VChildNode[] | null): VNode => {
+export const createElement = (type: string | Function, props: AnyObject | null, children: VChildNode[] | null) => {
   if (typeof type === "function") {
     return {
       type,
@@ -9,6 +9,7 @@ export const createElement = (type: string | Function, props: AnyObject, childre
         ...props,
         children: children ? flat(children) : null,
       },
+      children: null,
     };
   }
 
