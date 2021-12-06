@@ -85,12 +85,30 @@ describe("render", () => {
       return createElement("div", { id: "foo" }, [createElement("span", null, [props.greet]), props.children]);
     };
 
-    render(root, createElement(Foo, { greet: "hello" }, ["content1"]));
+    render(
+      root,
+      createElement(Foo, { greet: "hello" }, [
+        {
+          type: "span",
+          props: null,
+          children: ["content1"],
+        },
+      ]),
+    );
     // const prevContent = root.querySelector("#foo");
-    expect(root.innerHTML).toEqual(`<div id="foo"><span>hello</span>content1</div>`);
+    expect(root.innerHTML).toEqual(`<div id="foo"><span>hello</span><span>content1</span></div>`);
 
-    render(root, createElement(Foo, { greet: "good" }, ["content2"]));
-    expect(root.innerHTML).toEqual(`<div id="foo"><span>good</span>content2</div>`);
+    render(
+      root,
+      createElement(Foo, { greet: "good" }, [
+        {
+          type: "span",
+          props: null,
+          children: ["content2"],
+        },
+      ]),
+    );
+    expect(root.innerHTML).toEqual(`<div id="foo"><span>good</span><span>content2</span></div>`);
     // const currentContent = root.querySelector("#foo");
     //
     // expect(prevContent).toEqual(currentContent);

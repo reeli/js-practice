@@ -58,7 +58,11 @@ describe("createElement", () => {
           props: null,
           children: ["hello"],
         },
-        "content",
+        {
+          type: "span",
+          props: null,
+          children: ["content"],
+        },
       ],
     });
     expect(createElement(Foo, { greet: "hello" }, ["content1"])).toEqual({
