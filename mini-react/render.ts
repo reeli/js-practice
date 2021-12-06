@@ -1,32 +1,37 @@
 import { VNode } from "./types";
-import { isObject, isEqual } from "./utils";
+import { isObject, isEqual, isComponentVNode } from "./utils";
 
-const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode, beforeEl?: HTMLElement) => {
-  if (!prev) {
-    if (typeof current.type === "function") {
-      const n = current.type(current.props);
-      current.children = [n];
+const diff = (
+  parentEl: HTMLElement,
+  prev: VNode | null,
+  current: VNode,
+  beforeEl?: HTMLElement,
+) => {
+  if (isComponentVNode(current)) {
+    const currentChildren = current.type(current.props);
+    current.children = [currentChildren];
 
-      createEl(parentEl, n, beforeEl);
-      return;
+    if (!prev) {
+      return createEl(parentEl, currentChildren, beforeEl);
     }
 
-    createEl(parentEl, current, beforeEl);
+    if (!isEqual(prev.children, current.children)) {
+      diffChildren(prev?.html || parentEl, prev, current);
+    }
+
     return;
   }
 
-  if (typeof current.type === "function") {
-    current.children = [current.type(current.props)];
-    diffChildren(prev?.html || parentEl, prev, current);
+  if (!prev) {
+    return createEl(parentEl, current, beforeEl);
   }
 
   if (prev.type !== current.type) {
-    diffType(parentEl, prev, current);
-    return;
+    return diffType(parentEl, prev, current);
   }
 
-  if (prev.props && current.props && !isEqual(prev.props, current.props)) {
-    diffProps(prev, current);
+  if (!isEqual(prev.props, current.props)) {
+    diffProps(parentEl, prev, current);
   }
 
   if (!isEqual(prev.children, current.children)) {
@@ -34,7 +39,11 @@ const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode, beforeE
   }
 };
 
-const createEl = (parentEl: HTMLElement, current: VNode, beforeEl?: HTMLElement) => {
+const createEl = (
+  parentEl: HTMLElement,
+  current: VNode,
+  beforeEl?: HTMLElement,
+) => {
   const element = document.createElement(current.type as string);
   current.html = element;
 
@@ -61,17 +70,24 @@ const diffType = (parentEl: HTMLElement, prev: VNode, current: VNode) => {
   return;
 };
 
-const diffProps = (prev: VNode, current: VNode) => {
-  for (const k in prev.props) {
-    const currentKeys = Object.keys(current.props!);
+const diffProps = (_parentEl: HTMLElement, prev: VNode, current: VNode) => {
+  const currentProps = current.props || {};
+  const prevProps = prev.props || {};
+
+  for (const k in prevProps) {
+    const currentKeys = Object.keys(currentProps);
     if (currentKeys.includes(k)) {
-      prev.html && prev.props[k] !== current.props![k] && prev.html.setAttribute(k, current.props![k]);
+      prev.html &&
+        prevProps[k] !== currentProps[k] &&
+        prev.html.setAttribute(k, currentProps[k]);
     } else {
       prev.html && prev.html.removeAttribute(k);
     }
   }
 
-  const newAddedKeys = Object.keys(current.props!).filter((v) => !Object.keys(prev.props!).includes(v));
+  const newAddedKeys = Object.keys(currentProps).filter(
+    (v) => !Object.keys(prevProps).includes(v),
+  );
   newAddedKeys.forEach((k) => {
     prev.html && prev.html.setAttribute(k, current.props![k]);
   });
@@ -80,7 +96,9 @@ const diffProps = (prev: VNode, current: VNode) => {
 const diffChildren = (parentEl: HTMLElement, prev: VNode, current: VNode) => {
   prev.children?.forEach((v, idx) => {
     const prevChild = v as VNode;
-    const currentChild = current.children ? (current.children[idx] as VNode) : null;
+    const currentChild = current.children
+      ? (current.children[idx] as VNode)
+      : null;
 
     if (currentChild && isObject(prevChild) && isObject(currentChild)) {
       diff(parentEl, prevChild, currentChild);
@@ -94,7 +112,10 @@ const diffChildren = (parentEl: HTMLElement, prev: VNode, current: VNode) => {
   });
 };
 
-export const render = (parentEl: HTMLElement & { vDOM?: VNode }, vNode: VNode) => {
+export const render = (
+  parentEl: HTMLElement & { vDOM?: VNode },
+  vNode: VNode,
+) => {
   diff(parentEl, parentEl.vDOM || null, vNode);
   parentEl.vDOM = vNode;
 };

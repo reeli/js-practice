@@ -29,6 +29,7 @@ describe("createElement", () => {
           },
         ],
       },
+      children: null,
     });
   });
 
@@ -39,6 +40,7 @@ describe("createElement", () => {
       props: {
         children: null,
       },
+      children: null,
     });
   });
 
@@ -58,16 +60,13 @@ describe("createElement", () => {
           props: null,
           children: ["hello"],
         },
-        {
-          type: "span",
-          props: null,
-          children: ["content"],
-        },
+        "content",
       ],
     });
     expect(createElement(Foo, { greet: "hello" }, ["content1"])).toEqual({
       type: Foo,
       props: { greet: "hello", children: ["content1"] },
+      children: null,
     });
   });
 });
