@@ -1,6 +1,7 @@
 type AnyObject = Record<string, any>;
 
-type ChildNode = VNode | boolean | string | number | undefined | null;
+type ChildFn = (props:AnyObject)=> ChildNode;
+type ChildNode = VNode | ChildFn| boolean | string | number | undefined | null;
 
 interface VNode {
   type: string;
@@ -72,7 +73,7 @@ const propsDiff = (prev: VNode, current: VNode) => {
   });
 }
 
-const diff = (parentEl: HTMLElement & { vDOM?: VNode; }, prev: VNode | null, current: VNode, beforeEl?:HTMLElement) => {
+const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode, beforeEl?:HTMLElement) => {
   if (!prev) {
     const element = document.createElement(current.type);
     current.html = element;

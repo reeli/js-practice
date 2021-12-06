@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "strict": true,
 //    "strictFunctionTypes": false,
+    "jsx": "react-jsx",
     "alwaysStrict": true,
     "pretty": true,
     "noUnusedLocals": true,
