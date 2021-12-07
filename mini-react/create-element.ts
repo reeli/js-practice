@@ -1,5 +1,5 @@
 import { flat } from "./utils";
-import { VChildNode } from "./types";
+import { VChildNode, VNode } from "./types";
 
 export const createElement = (
   type: string | Function,
@@ -11,6 +11,15 @@ export const createElement = (
     props: {
       ...props,
       children: children ? flat(children) : null,
+    },
+  };
+};
+
+export const createTextVNode = (text: string | number): VNode => {
+  return {
+    type: "textNode",
+    props: {
+      content: text,
     },
   };
 };

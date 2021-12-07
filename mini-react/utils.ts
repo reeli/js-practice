@@ -1,4 +1,4 @@
-import { VNode } from "./types";
+import { VNode, ComponentVNode, TextVNode } from "./types";
 
 export const isObject = (data: any) =>
   typeof data === "object" && data !== null;
@@ -17,9 +17,13 @@ export const isEqual = (a?: any, b?: any): boolean => {
   return JSON.stringify(a) === JSON.stringify(b);
 };
 
-type ComponentVNode = Omit<VNode, "type"> & { type: Function };
 export const isComponentVNode = (vNode: VNode): vNode is ComponentVNode =>
   typeof vNode.type === "function";
+
+export const isTextNode = (vNode: VNode): vNode is TextVNode =>
+  vNode.type === "textNode";
+
+export const isVNode = isObject;
 
 export const omit = (obj: AnyObject, key: string): AnyObject =>
   Object.keys(obj)

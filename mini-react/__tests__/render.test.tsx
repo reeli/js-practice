@@ -2,17 +2,23 @@ import { createElement } from "../create-element";
 import { render } from "../render";
 
 describe("render", () => {
-  it("should render VNode to html", () => {
+  it("should render html element", () => {
     const div = document.createElement("div");
-    render(
-      div,
-      createElement("div", { id: "my-div" }, [123, 456, "hello-world"]),
-    );
+    render(div, createElement("div", { id: "my-div" }, ["hello-world"]));
 
-    expect(div.innerHTML).toEqual(`<div id="my-div">123456hello-world</div>`);
+    expect(div.innerHTML).toEqual(`<div id="my-div">hello-world</div>`);
   });
 
-  it("should render VNode to html with VNode children", () => {
+  it("should rerender html element", () => {
+    const div = document.createElement("div");
+    render(div, createElement("div", { id: "my-div" }, ["hello-world"]));
+    expect(div.innerHTML).toEqual(`<div id="my-div">hello-world</div>`);
+
+    render(div, createElement("div", { id: "my-div2" }, ["hello-world2"]));
+    expect(div.innerHTML).toEqual(`<div id="my-div2">hello-world2</div>`);
+  });
+
+  it("should render html with multiple child element", () => {
     const div = document.createElement("div");
     const child = createElement("span", { id: "content" }, ["my content"]);
     render(div, createElement("div", { id: "my-div" }, [child]));
@@ -114,46 +120,27 @@ describe("render", () => {
     render(
       root,
       createElement(Foo, { greet: "hello" }, [
-        {
-          type: "span",
-          props: {
-            children: ["content1"],
-          },
-        },
+        createElement("span", {}, ["content1"]),
       ]),
     );
 
-    // render(
-    //   root,
-    //   createElement(Foo, { greet: "hello" }, [
-    //     {
-    //       type: "span",
-    //       props: null,
-    //       children: ["content1"],
-    //     },
-    //   ]),
-    // );
-    // const prevContent = root.querySelector("#foo");
+    const prevContent = root.querySelector("#foo");
     expect(root.innerHTML).toEqual(
       `<div id="foo"><span>hello</span><span>content1</span></div>`,
     );
 
-    // render(
-    //   root,
-    //   createElement(Foo, { greet: "good" }, [
-    //     {
-    //       type: "span",
-    //       props: null,
-    //       children: ["content2"],
-    //     },
-    //   ]),
-    // );
-    // expect(root.innerHTML).toEqual(
-    //   `<div id="foo"><span>good</span><span>content2</span></div>`,
-    // );
-    // const currentContent = root.querySelector("#foo");
-    //
-    // expect(prevContent).toEqual(currentContent);
+    render(
+      root,
+      createElement(Foo, { greet: "good" }, [
+        createElement("span", {}, ["content2"]),
+      ]),
+    );
+    expect(root.innerHTML).toEqual(
+      `<div id="foo"><span>good</span><span>content2</span></div>`,
+    );
+    const currentContent = root.querySelector("#foo");
+
+    expect(prevContent).toEqual(currentContent);
   });
 
   it("should handle text content in component children", () => {
@@ -162,16 +149,13 @@ describe("render", () => {
     render(
       root,
       createElement("div", { id: "hello" }, [
-        {
-          type: "span",
-          props: {
-            children: ["content1"],
-          },
-        },
+        createElement("span", {}, ["content1"]),
         "content2",
       ]),
     );
 
-    expect(root.innerHTML).toEqual("");
+    expect(root.innerHTML).toEqual(
+      `<div id="hello"><span>content1</span>content2</div>`,
+    );
   });
 });
