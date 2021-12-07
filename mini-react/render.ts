@@ -1,5 +1,5 @@
 import { VNode } from "./types";
-import { isObject, isEqual, isComponentVNode } from "./utils";
+import { isObject, isEqual, isComponentVNode, omit } from "./utils";
 
 const diff = (
   parentEl: HTMLElement,
@@ -9,13 +9,13 @@ const diff = (
 ) => {
   if (isComponentVNode(current)) {
     const currentChildren = current.type(current.props);
-    current.children = [currentChildren];
+    current.output = [currentChildren];
 
     if (!prev) {
       return createEl(parentEl, currentChildren, beforeEl);
     }
 
-    if (!isEqual(prev.children, current.children)) {
+    if (!isEqual(prev.output, current.output)) {
       diffChildren(prev?.html || parentEl, prev, current);
     }
 
@@ -34,9 +34,9 @@ const diff = (
     diffProps(parentEl, prev, current);
   }
 
-  if (!isEqual(prev.children, current.children)) {
-    diffChildren(prev?.html || parentEl, prev, current);
-  }
+  // if (!isEqual(prev.children, current.children)) {
+  //   diffChildren(prev?.html || parentEl, prev, current);
+  // }
 };
 
 const createEl = (
@@ -46,20 +46,21 @@ const createEl = (
 ) => {
   const element = document.createElement(current.type as string);
   current.html = element;
+  const { children, ...currentProps } = current.props || {};
 
-  for (const k in current.props) {
-    element.setAttribute(k, current.props[k]);
+  for (const k in currentProps) {
+    element.setAttribute(k, currentProps[k]);
   }
 
-  current.children?.forEach((v) => {
-    if (isObject(v)) {
-      diff(element, null, v as VNode);
-      return;
-    }
-
-    const textNode = document.createTextNode(v as string);
-    element.appendChild(textNode);
-  });
+  // current.children?.forEach((v) => {
+  //   if (isObject(v)) {
+  //     diff(element, null, v as VNode);
+  //     return;
+  //   }
+  //
+  //   const textNode = document.createTextNode(v as string);
+  //   element.appendChild(textNode);
+  // });
 
   parentEl.insertBefore(element, beforeEl || null);
 };
@@ -71,8 +72,8 @@ const diffType = (parentEl: HTMLElement, prev: VNode, current: VNode) => {
 };
 
 const diffProps = (_parentEl: HTMLElement, prev: VNode, current: VNode) => {
-  const currentProps = current.props || {};
-  const prevProps = prev.props || {};
+  const currentProps = omit(current.props, "children") || {};
+  const prevProps = omit(prev.props, "children") || {};
 
   for (const k in prevProps) {
     const currentKeys = Object.keys(currentProps);
@@ -94,11 +95,9 @@ const diffProps = (_parentEl: HTMLElement, prev: VNode, current: VNode) => {
 };
 
 const diffChildren = (parentEl: HTMLElement, prev: VNode, current: VNode) => {
-  prev.children?.forEach((v, idx) => {
+  prev.output?.forEach((v, idx) => {
     const prevChild = v as VNode;
-    const currentChild = current.children
-      ? (current.children[idx] as VNode)
-      : null;
+    const currentChild = current.output ? (current.output[idx] as VNode) : null;
 
     if (currentChild && isObject(prevChild) && isObject(currentChild)) {
       diff(parentEl, prevChild, currentChild);
@@ -107,7 +106,7 @@ const diffChildren = (parentEl: HTMLElement, prev: VNode, current: VNode) => {
 
     if (currentChild && !isObject(currentChild)) {
       const content = document.createTextNode(currentChild as any);
-      parentEl.replaceChildren(content);
+      parentEl.appendChild(content);
     }
   });
 };

@@ -116,8 +116,9 @@ describe("render", () => {
       createElement(Foo, { greet: "hello" }, [
         {
           type: "span",
-          props: null,
-          children: ["content1"],
+          props: {
+            children: ["content1"],
+          },
         },
       ]),
     );
@@ -153,5 +154,24 @@ describe("render", () => {
     // const currentContent = root.querySelector("#foo");
     //
     // expect(prevContent).toEqual(currentContent);
+  });
+
+  it("should handle text content in component children", () => {
+    const root = document.createElement("div");
+
+    render(
+      root,
+      createElement("div", { id: "hello" }, [
+        {
+          type: "span",
+          props: {
+            children: ["content1"],
+          },
+        },
+        "content2",
+      ]),
+    );
+
+    expect(root.innerHTML).toEqual("");
   });
 });

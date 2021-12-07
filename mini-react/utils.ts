@@ -20,3 +20,13 @@ export const isEqual = (a?: any, b?: any): boolean => {
 type ComponentVNode = Omit<VNode, "type"> & { type: Function };
 export const isComponentVNode = (vNode: VNode): vNode is ComponentVNode =>
   typeof vNode.type === "function";
+
+export const omit = (obj: AnyObject, key: string): AnyObject =>
+  Object.keys(obj)
+    .filter((v) => v !== key)
+    .reduce((res, k) => {
+      return {
+        ...res,
+        [k]: obj[k],
+      };
+    }, {});
