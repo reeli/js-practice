@@ -7,7 +7,7 @@ graph TD
   D1 --> G
   B --> E(TextVNode)
   E --> E1(create text node and insert to parent)
-  C --> F("Create and Insert HTML to Parent(type, props without children)" )
+  C --> F("Create and Insert HTML to <br> Parent(type, props without children)" )
   F --> G(Iterateprops.children) 
   G --> H{Is string or number?}
   H --> I(Create TextVNode)
@@ -20,15 +20,15 @@ graph TD
   
   firstCreate(Start First Create) --> VNode
   
-  diff(Start Diff) --> checkType{Is type equal?}
-  checkType --> |No| VNode
-  checkType --> |Yes| checkProps{Is props equal?}
+  diff(Start Diff) --> checkType{Is prev.type and <br> current.type equal?}
+  checkType --> |"No renderNode(current)"| VNode
+  checkType --> |Yes| checkProps{Is prev.props  and <br> current.props equal?}
   checkProps --> |Yes| return(Done)
-  checkProps --> |No| split(Split into Chilren and OtherProps)
-  split --> checkOtherProps{Is otherProps equal?}
+  checkProps --> |No| split(Split into Chilren <br> and OtherProps)
+  split --> checkOtherProps{Is prev.otherProps  and <br> current.otherProps equal?}
   checkOtherProps --> |Yes| done(Done)
   checkOtherProps --> |No| updateProps(Update Props and  DOM)
-  split --> checkPropsChildren{Is props.children equal?}
+  split --> checkPropsChildren{Is prev.props.children and <br> current.props.children equal?}
   checkPropsChildren --> |No| iterateChild(Iterate  props.children)
   checkPropsChildren --> |Yes| d(Done)
   iterateChild --> H1{Is string or number?}
@@ -38,9 +38,6 @@ graph TD
   I1 --> L1(Filtered children)
   K1 --> L1
   L1 --> M1("Set _Children(VNode[])")
-  M1 --> K2("Diff _Children")
+  M1 --> K2("Diff prev._children and current._children")
   K2 --> |each| diff
-  
-  
-  
 ```
