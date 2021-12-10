@@ -2,11 +2,34 @@ import { createElement } from "../create-element";
 import { render } from "../render";
 
 describe("render", () => {
-  it("should render html element", () => {
-    const div = document.createElement("div");
-    render(div, createElement("div", { id: "my-div" }, ["hello-world"]));
+  it("should handle html elements when first render", () => {
+    const root = document.createElement("div");
+    const vNode = createElement("div", { id: "container" }, ["hello-world"]);
 
-    expect(div.innerHTML).toEqual(`<div id="my-div">hello-world</div>`);
+    render(root, vNode);
+
+    expect(root.innerHTML).toEqual(`<div id="container">hello-world</div>`);
+    // expect((root as any).vDOM._children).toEqual([
+    //   { type: "textNode", props: { content: "hello-world" } },
+    // ]);
+    // expect((root as any).vDOM._html).toBeTruthy();
+  });
+
+  it("should handle components when first render", () => {
+    const root = document.createElement("div");
+    const Foo = (props: any) =>
+      createElement("div", {}, [
+        props.name,
+        createElement("span", { id: "children" }, [props.children]),
+      ]);
+
+    render(root, createElement(Foo, { name: "hello" }, ["hello-world"]));
+
+    expect(root.innerHTML).toEqual(
+      `<div>hello<span id="children">hello-world</span></div>`,
+    );
+    // expect((root as any).vDOM._children).toBeTruthy();
+    // expect((root as any).vDOM._html).toBeTruthy();
   });
 
   it("should rerender html element", () => {

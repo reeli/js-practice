@@ -23,7 +23,7 @@ export const isComponentVNode = (vNode: VNode): vNode is ComponentVNode =>
 export const isTextNode = (vNode: VNode): vNode is TextVNode =>
   vNode.type === "textNode";
 
-export const isVNode = isObject;
+export const isVNode = (v: any): v is VNode => isObject(v);
 
 export const omit = (obj: AnyObject, key: string): AnyObject =>
   Object.keys(obj)

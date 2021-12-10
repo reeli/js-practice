@@ -151,10 +151,57 @@ const diffTextNode = (_parentEl: HTMLElement, prev: VNode, current: VNode) => {
   current._html.nodeValue = current.props.content;
 };
 
+const create = (vNode: VNode, parentEl: HTMLElement) => {
+  if (typeof vNode.type === "function") {
+    const _children = vNode.type(vNode.props);
+    vNode._children = [_children];
+
+    create(_children, parentEl);
+
+    return;
+  }
+
+  if (vNode.type === "textNode") {
+    parentEl.textContent = vNode.props.content;
+    return;
+  }
+
+  const element = document.createElement(vNode.type);
+  const { children, ...otherProps } = vNode.props || {};
+
+  if (children) {
+    children.forEach((child) => {
+      if (typeof child === "string" || typeof child === "number") {
+        const textNode = createTextVNode(child);
+        vNode._children = [...(vNode._children || []), textNode];
+        create(textNode, element);
+      }
+
+      if (isVNode(child)) {
+        create(child, element);
+      }
+    });
+  }
+
+  if (otherProps) {
+    Object.keys(otherProps).forEach((key) => {
+      element.setAttribute(key, otherProps[key]);
+    });
+  }
+
+  parentEl.appendChild(element);
+  vNode._html = element;
+};
+
 export const render = (
   parentEl: HTMLElement & { vDOM?: VNode },
   vNode: VNode,
 ) => {
-  diff(parentEl, parentEl.vDOM || null, vNode);
+  if (!parentEl.vDOM) {
+    create(vNode, parentEl);
+    parentEl.vDOM = vNode;
+  } else {
+    // diff(parentEl, parentEl.vDOM || null, vNode);
+  }
   parentEl.vDOM = vNode;
 };
