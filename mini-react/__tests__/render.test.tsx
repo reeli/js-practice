@@ -181,4 +181,34 @@ describe("render", () => {
       `<div id="hello"><span>content1</span>content2</div>`,
     );
   });
+
+  it("should diff components when set key for children", () => {
+    const root = document.createElement("div");
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el1", key: "el1" }, ["element1"]),
+        createElement("span", { id: "el2", key: "el2" }, ["element2"]),
+        createElement("span", { id: "el3", key: "el3" }, ["element3"]),
+      ]),
+    );
+
+    const prevEl3 = root.querySelector("#el3");
+
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el3", key: "el3" }, ["element3"]),
+        createElement("span", { id: "el4", key: "el4" }, ["element4"]),
+        createElement("span", { id: "el5", key: "el5" }, ["element5"]),
+      ]),
+    );
+
+    const currentEl3 = root.querySelector("#el3");
+
+    expect(prevEl3).toEqual(currentEl3);
+    expect(root.innerHTML).toEqual(
+      `<div id="foo"><span id="el3">element3</span><span id="el4">element4</span><span id="el5">element5</span></div>`,
+    );
+  });
 });

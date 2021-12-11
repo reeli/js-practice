@@ -1,8 +1,12 @@
-import { VNode } from "./types";
+import { VNode, AnyObject } from "./types";
 import { isEqual, isVNode } from "./utils";
 import { createTextVNode } from "./create-element";
 
-const diff = (parentEl: HTMLElement, prev: VNode, current: VNode) => {
+const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode) => {
+  if (!prev) {
+    return create(parentEl, current);
+  }
+
   if (typeof current.type === "function") {
     setChildren(current, [current.type(current.props)]);
     diffChildren(parentEl, prev._children, current._children);
@@ -19,8 +23,12 @@ const diff = (parentEl: HTMLElement, prev: VNode, current: VNode) => {
     return;
   }
 
-  const { children: prevChildren, ...prevProps } = prev.props;
-  const { children: currentChildren, ...currentProps } = current.props;
+  const { children: prevChildren, key: prevKey, ...prevProps } = prev.props;
+  const {
+    children: currentChildren,
+    key: currentKey,
+    ...currentProps
+  } = current.props;
 
   if (current.type === "textNode") {
     const textNode = document.createTextNode(current.props.content);
@@ -96,13 +104,23 @@ const diffChildren = (
   prevChildren: VNode["_children"],
   currentChildren: VNode["_children"],
 ) => {
+  const prevChildrenMap: AnyObject = {};
+
+  prevChildren?.forEach((v, idx) => {
+    prevChildrenMap[v.props.key || idx] = v;
+  });
+
   currentChildren?.forEach((currentChild, idx) => {
-    const prevChild = prevChildren ? prevChildren[idx] : null;
-    if (prevChild) {
-      diff(el, prevChild, currentChild);
-    } else {
-      create(el, currentChild);
-    }
+    const currentKey = currentChild.props["key"] || idx;
+    const prevChild = prevChildrenMap[currentKey] || null;
+
+    diff(el, prevChild, currentChild);
+
+    delete prevChildrenMap[currentKey];
+  });
+
+  Object.values(prevChildrenMap)?.forEach((prev) => {
+    prev._html?.remove();
   });
 };
 
@@ -133,7 +151,7 @@ const create = (
   }
 
   const element = document.createElement(vNode.type);
-  const { children, ...otherProps } = vNode.props || {};
+  const { children, key, ...otherProps } = vNode.props || {};
 
   if (otherProps) {
     Object.keys(otherProps).forEach((key) => {

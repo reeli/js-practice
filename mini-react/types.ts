@@ -3,6 +3,7 @@ export type VChildNode = VNode | boolean | string | number | undefined | null;
 export interface VNode {
   type: string | Function;
   props: {
+    key?: string | number;
     [key: string]: any;
     children?: VChildNode[] | null;
   };
