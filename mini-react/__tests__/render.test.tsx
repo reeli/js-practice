@@ -182,7 +182,7 @@ describe("render", () => {
     );
   });
 
-  it("should diff components when set key for children", () => {
+  it("should diff children with key", () => {
     const root = document.createElement("div");
     render(
       root,
@@ -209,6 +209,43 @@ describe("render", () => {
     expect(prevEl3).toEqual(currentEl3);
     expect(root.innerHTML).toEqual(
       `<div id="foo"><span id="el3">element3</span><span id="el4">element4</span><span id="el5">element5</span></div>`,
+    );
+  });
+
+  it("should diff children without key", () => {
+    const root = document.createElement("div");
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el1" }, ["element1"]),
+        createElement("span", { id: "el2" }, ["element2"]),
+        createElement("span", { id: "el3" }, ["element3"]),
+      ]),
+    );
+
+    const prevEl1 = root.querySelector("#el1");
+    const prevEl2 = root.querySelector("#el2");
+    const prevEl3 = root.querySelector("#el3");
+
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el3" }, ["element3"]),
+        createElement("span", { id: "el2" }, ["element2"]),
+        createElement("span", { id: "el1" }, ["element1"]),
+      ]),
+    );
+
+    const currentEl1 = root.querySelector("#el1");
+    const currentEl2 = root.querySelector("#el2");
+    const currentEl3 = root.querySelector("#el3");
+
+    expect(prevEl1).not.toEqual(currentEl1);
+    expect(prevEl3).not.toEqual(currentEl3);
+    expect(prevEl2).toEqual(currentEl2);
+
+    expect(root.innerHTML).toEqual(
+      `<div id="foo"><span id="el3">element3</span><span id="el2">element2</span><span id="el1">element1</span></div>`,
     );
   });
 });
