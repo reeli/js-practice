@@ -16,7 +16,7 @@ graph TD
   I --> L(Filtered children)
   K --> L
   L --> M("Set _Children(VNode[])")
-  L --> VNode
+  M --> |each| VNode
   
   firstCreate(Start First Create) --> VNode
   

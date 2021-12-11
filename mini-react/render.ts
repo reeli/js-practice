@@ -106,6 +106,12 @@ const diffChildren = (
   });
 };
 
+function commitChildren(parentEl: HTMLElement, children: VNode[] = []) {
+  children?.forEach((child) => {
+    create(parentEl, child);
+  });
+}
+
 const create = (
   parentEl: HTMLElement,
   vNode: VNode,
@@ -139,18 +145,8 @@ const create = (
   vNode._html = element;
 
   if (children) {
-    children.forEach((child) => {
-      if (typeof child === "string" || typeof child === "number") {
-        const textNode = createTextVNode(child);
-        vNode._children = [...(vNode._children || []), textNode];
-        create(element, textNode);
-      }
-
-      if (isVNode(child)) {
-        vNode._children = [...(vNode._children || []), child];
-        create(element, child, beforeEl);
-      }
-    });
+    setChildren(vNode, children);
+    commitChildren(element, vNode._children);
   }
 };
 

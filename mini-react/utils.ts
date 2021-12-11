@@ -32,3 +32,8 @@ export const omit = (obj: AnyObject, key: string): AnyObject =>
         [k]: obj[k],
       };
     }, {});
+
+export const stringifyHTML = (e: HTMLElement = {} as any) =>
+  `${e.tagName} ${Object.keys(e.attributes || {})
+    .map((_, idx) => `${e.attributes[idx].name}=${e.attributes[idx].value}`)
+    .join(" ")} ${e.innerHTML}`;
