@@ -19,34 +19,53 @@ const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode) => {
   current._html = prev._html;
 
   if (prev.type !== current.type) {
-    create(current._html || parentEl, current);
+    create((current._html || parentEl) as HTMLElement, current);
     return;
   }
 
   const { children: prevChildren, ...prevProps } = prev.props;
   const { children: currentChildren, ...currentProps } = current.props;
 
-  if ((prevProps || currentProps) && !isEqual(prevProps, currentProps)) {
-    diffProps(current._html || parentEl, prevProps, currentProps);
+  if (current.type === "textNode") {
+    const textNode = document.createTextNode(current.props.content);
+    parentEl.insertBefore(textNode, current._html || null);
+    current._html!.remove();
+    current._html = textNode;
+    return;
   }
 
-  if (
-    (prev._children || current._children) &&
-    !isEqual(prev._children, current._children)
-  ) {
-    diffChildren(current._html || parentEl, prev._children, current._children);
+  if ((prevProps || currentProps) && !isEqual(prevProps, currentProps)) {
+    diffProps(
+      (current._html || parentEl) as HTMLElement,
+      prevProps,
+      currentProps,
+    );
+  }
+
+  currentChildren && setChildren(current, currentChildren);
+
+  if (prev._children || current._children) {
+    diffChildren(
+      (current._html || parentEl) as HTMLElement,
+      prev._children,
+      current._children,
+    );
   }
 };
 
 const setChildren = (vNode: VNode, children: any[]) => {
+  vNode._children = [];
+
   children.forEach((child) => {
     if (typeof child === "string" || typeof child === "number") {
       const textNode = createTextVNode(child);
-      vNode._children = [...(vNode._children || []), textNode];
+      vNode._children?.push(textNode);
+      return;
     }
 
     if (isVNode(child)) {
-      vNode._children = [...(vNode._children || []), child];
+      vNode._children?.push(child);
+      return;
     }
   });
 };
@@ -91,12 +110,13 @@ const create = (parentEl: HTMLElement, vNode: VNode) => {
     vNode._children = [_children];
 
     create(parentEl, _children);
-
     return;
   }
 
   if (vNode.type === "textNode") {
-    parentEl.textContent = vNode.props.content;
+    const textNode = document.createTextNode(vNode.props.content);
+    parentEl.insertBefore(textNode, null);
+    vNode._html = textNode;
     return;
   }
 
@@ -112,6 +132,7 @@ const create = (parentEl: HTMLElement, vNode: VNode) => {
       }
 
       if (isVNode(child)) {
+        vNode._children = [...(vNode._children || []), child];
         create(element, child);
       }
     });

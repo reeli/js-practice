@@ -7,7 +7,7 @@ export interface VNode {
     children?: VChildNode[] | null;
   };
   _children?: VNode[]; // output: type(props)
-  _html?: HTMLElement;
+  _html?: HTMLElement | Text;
 }
 export type ComponentVNode = Omit<VNode, "type"> & { type: Function };
 export type ElementVNode = Omit<VNode, "type"> & { type: string };
