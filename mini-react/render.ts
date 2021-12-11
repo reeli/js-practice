@@ -8,6 +8,12 @@ const diff = (parentEl: HTMLElement, prev: VNode | null, current: VNode) => {
   }
 
   if (typeof current.type === "function") {
+    if (!current.props.key && current.type !== prev.type) {
+      setChildren(current, [current.type(current.props)]);
+      commitChildren(parentEl, current._children);
+      return;
+    }
+
     setChildren(current, [current.type(current.props)]);
     diffChildren(parentEl, prev._children, current._children);
     return;
@@ -104,6 +110,11 @@ const diffChildren = (
   prevChildren: VNode["_children"],
   currentChildren: VNode["_children"],
 ) => {
+  if (!currentChildren || currentChildren.length == 0) {
+    prevChildren?.forEach((v) => v._html?.remove());
+    return;
+  }
+
   const prevChildrenMap: AnyObject = {};
 
   prevChildren?.forEach((v, idx) => {

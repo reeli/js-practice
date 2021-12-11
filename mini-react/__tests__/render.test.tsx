@@ -248,4 +248,88 @@ describe("render", () => {
       `<div id="foo"><span id="el3">element3</span><span id="el2">element2</span><span id="el1">element1</span></div>`,
     );
   });
+
+  it("should diff children with more prev children and less current children", () => {
+    const root = document.createElement("div");
+
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el1" }, ["element1"]),
+        createElement("span", { id: "el2" }, ["element2"]),
+        createElement("span", { id: "el3" }, ["element3"]),
+      ]),
+    );
+
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el1" }, ["element1"]),
+        createElement("span", { id: "el2" }, ["element2"]),
+      ]),
+    );
+
+    expect(root.innerHTML).toEqual(
+      `<div id="foo"><span id="el1">element1</span><span id="el2">element2</span></div>`,
+    );
+  });
+
+  it("should diff children with less prev children and more current children", () => {
+    const root = document.createElement("div");
+
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el1" }, ["element1"]),
+      ]),
+    );
+    const prevEl1 = root.querySelector("#el1");
+
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el1" }, ["element1"]),
+        createElement("span", { id: "el2" }, ["element2"]),
+      ]),
+    );
+
+    const currentEl1 = root.querySelector("#el1");
+
+    expect(prevEl1).toEqual(currentEl1);
+    expect(root.innerHTML).toEqual(
+      `<div id="foo"><span id="el1">element1</span><span id="el2">element2</span></div>`,
+    );
+  });
+
+  it("should diff children when prev children is null", () => {
+    const root = document.createElement("div");
+
+    render(root, createElement("div", { id: "foo" }, []));
+
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el1" }, ["element1"]),
+      ]),
+    );
+
+    expect(root.innerHTML).toEqual(
+      `<div id="foo"><span id="el1">element1</span></div>`,
+    );
+  });
+
+  it("should diff children when current children is null", () => {
+    const root = document.createElement("div");
+
+    render(
+      root,
+      createElement("div", { id: "foo" }, [
+        createElement("span", { id: "el1" }, ["element1"]),
+      ]),
+    );
+
+    render(root, createElement("div", { id: "foo" }, []));
+
+    expect(root.innerHTML).toEqual(`<div id="foo"></div>`);
+  });
 });
