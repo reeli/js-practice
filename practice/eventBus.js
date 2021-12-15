@@ -51,14 +51,20 @@ var eventBus2 = new EventBus();
 
 // var eventBus2 = new EventBus();
 
-const bind = (cb) => {
-  eventBus2.on("sayHi", () => cb());
+const myRef = { current: () => {} };
+
+const bind = (ref) => {
+  eventBus2.on("sayHi", () => ref.current());
 };
 
-bind(() => console.log(1));
+myRef.current = () => console.log(1);
+
+bind(myRef);
 console.log("after first bind");
 
 console.log("before emit");
+myRef.current = () => console.log(2);
+
 eventBus2.emit("sayHi", Math.random().toFixed(2));
 
 // 再一次 bind() 之后 callback 并没有 trigger 当前的 callback，而是前一次的 callback，因为 emit 在第二次 bind 之前执行了
