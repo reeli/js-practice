@@ -54,18 +54,19 @@ function fib(num) {
   if (num === 0) {
     return 0;
   }
+
   if (num === 1) {
     return 1;
   }
 
-  let first = 0;
-  let second = 0;
-  let sum = 1;
+  let sum = 0;
+  let last = 0;
+  let curr = 1;
 
-  for (let i = 1; i <= num; i++) {
-    sum = first + second;
-    first = second;
-    second = sum;
+  for (let i = 2; i <= num; i++) {
+    sum = last + curr;
+    last = curr;
+    curr = sum;
   }
 
   return sum;
