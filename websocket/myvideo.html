@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Websocket</title>
+</head>
+<body>
+<!--<audio src="./a.ogg" controls></audio>-->
+<!--<button onclick="play()">test</button>-->
+<button onclick="notifyMe()">Notify me!</button>
+<script>
+  function notifyMe() {
+    console.log(Notification.permission,'Notification.permission')
+    if (!("Notification" in window)) {
+      // Check if the browser supports notifications
+      alert("This browser does not support desktop notification");
+    } else if (Notification.permission === "granted") {
+      // Check whether notification permissions have already been granted;
+      // if so, create a notification
+      const notification = new Notification("Hi there111!");
+      play()
+      // …
+    } else if (Notification.permission !== "denied") {
+      // We need to ask the user for permission
+      Notification.requestPermission().then((permission) => {
+        // If the user accepts, let's create a notification
+        if (permission === "granted") {
+          const notification = new Notification("Hi there!");
+          // …
+          notification.onclick = function () {
+            window.focus();  // 点击通知后，聚焦到窗口
+          };
+        }
+      });
+    }
+
+    // At last, if the user has denied notifications, and you
+    // want to be respectful there is no need to bother them anymore.
+  }
+  function play(){
+    // const sound = new Audio(`./a.ogg?ts=${new Date().getTime()}`);
+    // sound.load();
+    // sound.play()
+    const audio = document.createElement("audio");
+    audio.src = `./a.ogg?ts=${new Date().getTime()}`;
+    audio.muted = false;
+    audio.preload = true;
+    audio.autoplay = true;
+    // audio.autoplay = true;
+    // window.focus();
+    audio.addEventListener("loadeddata", ()=>{
+      console.log("loaded");
+      audio.muted = false;
+      audio.play();
+    })
+    audio.addEventListener("ended", ()=>{
+      audio.remove();
+    })
+    document.body.append(audio)
+  }
+
+  setTimeout(()=>{
+    play();
+  }, 1000);
+</script>
+</body>
+</html>

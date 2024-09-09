@@ -1,0 +1,12 @@
+{
+  "name": "Alert-Beep",
+  "manifest_version": 2,
+  "version": "0.1",
+  "description": "Beeps if alert() is called",
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["play.js"]
+    }
+  ]
+}
